@@ -1,19 +1,25 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\{
-    ProfileController,
+use App\Http\Controllers\{ProfileController,
+    QuestionController,
+    ReportController,
     StudentController,
     TeacherController,
     CoordinatorController,
     FormController,
     StudentFormController,
-    AnswerController
-};
+    AnswerController};
 
-Route::get('/', function () {
-    return view('welcome');
-});
+use App\Http\Controllers\AuthController;
+
+Route::get('/', [AuthController::class, 'showLoginForm'])->name('login');
+Route::post('/login', [AuthController::class, 'login'])->name('login.perform');
+
+Route::get('/register', [AuthController::class, 'showRegisterForm'])->name('register');
+Route::post('/register', [AuthController::class, 'register'])->name('register.perform');
+
+Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
 Route::get('/dashboard', function () {
     return view('dashboard');
@@ -22,6 +28,7 @@ Route::get('/dashboard', function () {
 
 Route::middleware(['auth'])->group(function () {
 
+    Route::get('/relatorio', [ReportController::class, 'index'])->name('report.index');
 
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
@@ -35,7 +42,7 @@ Route::middleware(['auth'])->group(function () {
 
 
     Route::resource('coordinators', CoordinatorController::class);
-
+    Route::resource('questions', QuestionController::class);
 
     Route::resource('forms', FormController::class);
     Route::post('forms/{form}/validate', [FormController::class, 'validateForm'])->name('forms.validate');
@@ -50,7 +57,4 @@ Route::middleware(['auth'])->group(function () {
     Route::get('forms/{form}/responder', [AnswerController::class, 'showForm'])->name('forms.responder');
     Route::post('forms/{form}/responder', [AnswerController::class, 'store'])->name('forms.enviar');
 });
-
-
-require __DIR__.'/auth.php';
 
