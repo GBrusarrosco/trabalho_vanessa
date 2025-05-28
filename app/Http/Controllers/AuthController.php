@@ -38,6 +38,11 @@ class AuthController extends Controller
             'email' => 'required|email|unique:users',
             'document' => 'required|unique:users',
             'password' => 'required|string|min:6|confirmed',
+            'type' => 'required|in:aluno,professor,coordenador',
+            'turma' => 'required_if:type,aluno',
+            'ano_letivo' => 'required_if:type,aluno',
+            'area' => 'required_if:type,professor',
+            'departamento' => 'required_if:type,coordenador',
         ]);
 
         $user = User::create([
@@ -45,8 +50,39 @@ class AuthController extends Controller
             'email' => $request->email,
             'document' => $request->document,
             'password' => Hash::make($request->password),
-            'role' => 'aluno', // ou outro valor padrão
         ]);
+
+        $user = User::create([
+            'name' => $request->name,
+            'email' => $request->email,
+            'document' => $request->document,
+            'password' => Hash::make($request->password),
+        ]);
+
+        switch ($request->type) {
+            case 'aluno':
+                $user->assignRole('aluno');
+                $user->student()->create([
+                    'turma' => $request->turma,
+                    'ano_letivo' => $request->ano_letivo,
+                ]);
+                break;
+
+            case 'professor':
+                $user->assignRole('professor');
+                $user->teacher()->create([
+                    'area' => $request->area,
+                    'observacoes' => $request->observacoes ?? null,
+                ]);
+                break;
+
+            case 'coordenador':
+                $user->assignRole('coordenador');
+                $user->coordinator()->create([
+                    'departamento' => $request->departamento,
+                ]);
+                break;
+        }
 
         Auth::login($user);
 

@@ -1,76 +1,57 @@
 <?php
 
-/**
- * Created by Reliese Model.
- */
-
 namespace App\Models;
 
+use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Notifications\Notifiable;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Database\Eloquent\Model;
 
-/**
- * Class User
- *
- * @property int $id
- * @property string $name
- * @property string $email
- * @property Carbon|null $email_verified_at
- * @property string $password
- * @property string $role
- * @property string|null $remember_token
- * @property string|null $document
- * @property Carbon|null $created_at
- * @property Carbon|null $updated_at
- *
- * @property Collection|Student[] $students
- * @property Collection|Teacher[] $teachers
- * @property Collection|Coordinator[] $coordinators
- * @property Collection|Form[] $forms
- *
- * @package App\Models
- */
-class User extends Model
+class User extends Authenticatable
 {
-	protected $table = 'users';
+    use Notifiable;
 
-	protected $casts = [
-		'email_verified_at' => 'datetime'
-	];
+    protected $table = 'users';
 
-	protected $hidden = [
-		'password',
-		'remember_token'
-	];
+    protected $casts = [
+        'email_verified_at' => 'datetime',
+    ];
 
-	protected $fillable = [
-		'name',
-		'email',
-		'email_verified_at',
-		'password',
-		'role',
-		'remember_token',
-        'document'
-	];
+    protected $hidden = [
+        'password',
+        'remember_token',
+    ];
 
-	public function students()
-	{
-		return $this->hasMany(Student::class);
-	}
+    protected $fillable = [
+        'name',
+        'email',
+        'email_verified_at',
+        'password',
+        'role',
+        'remember_token',
+        'document',
+    ];
 
-	public function teachers()
-	{
-		return $this->hasMany(Teacher::class);
-	}
+    // Relações
 
-	public function coordinators()
-	{
-		return $this->hasMany(Coordinator::class);
-	}
+    public function student()
+    {
+        return $this->hasOne(Student::class);
+    }
 
-	public function forms()
-	{
-		return $this->hasMany(Form::class, 'validated_by');
-	}
+    public function teacher()
+    {
+        return $this->hasOne(Teacher::class);
+    }
+
+    public function coordinator()
+    {
+        return $this->hasOne(Coordinator::class);
+    }
+
+
+    public function forms()
+    {
+        return $this->hasMany(Form::class, 'validated_by');
+    }
 }
