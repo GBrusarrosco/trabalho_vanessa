@@ -1,3 +1,39 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Cores customizadas para deixar o sistema mais claro e visível */
+body,
+.bg-gradient-to-br,
+.bg-white,
+.bg-gray-100,
+.bg-indigo-100,
+.bg-pink-100 {
+    background: #f7fafc !important;
+}
+
+input,
+select,
+textarea {
+    background-color: #fff !important;
+    color: #222 !important;
+    border-color: #cbd5e1 !important;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+    outline: 2px solid #6366f1 !important;
+    background-color: #f0f7ff !important;
+    border-color: #6366f1 !important;
+}
+
+.bg-white,
+.dark\:bg-gray-800 {
+    background-color: #fff !important;
+}
+
+.text-gray-900,
+.dark\:text-gray-100 {
+    color: #222 !important;
+}

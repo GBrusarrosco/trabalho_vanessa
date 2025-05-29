@@ -1,7 +1,8 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\{ProfileController,
+use App\Http\Controllers\{
+    ProfileController,
     QuestionController,
     ReportController,
     StudentController,
@@ -9,9 +10,11 @@ use App\Http\Controllers\{ProfileController,
     CoordinatorController,
     FormController,
     StudentFormController,
-    AnswerController};
+    AnswerController
+};
 
 use App\Http\Controllers\AuthController;
+use Illuminate\Support\Facades\Auth;
 
 Route::get('/', [AuthController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [AuthController::class, 'login'])->name('login.perform');
@@ -22,7 +25,8 @@ Route::post('/register', [AuthController::class, 'register'])->name('register.pe
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
 Route::get('/dashboard', function () {
-    return view('dashboard');
+    $user = Auth::user();
+    return view('dashboard', compact('user'));
 })->middleware(['auth', 'verified'])->name('dashboard');
 
 
@@ -57,4 +61,3 @@ Route::middleware(['auth'])->group(function () {
     Route::get('forms/{form}/responder', [AnswerController::class, 'showForm'])->name('forms.responder');
     Route::post('forms/{form}/responder', [AnswerController::class, 'store'])->name('forms.enviar');
 });
-
