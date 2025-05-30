@@ -18,7 +18,7 @@
             <h2 class="text-3xl font-bold text-center text-indigo-700 mb-6">Cadastro</h2>
             <form id="chooseProfileForm" class="space-y-6">
                 <div>
-                    <label for="profile" class="block text-sm font-medium text-gray-700">Quem é você?</label>
+                    <label for="profile" class="block text-sm font-medium text-gray-900">Quem é você?</label>
                     <select id="profile" name="profile" required class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:ring-2 focus:ring-indigo-500 bg-white text-gray-900">
                         <option value="">Selecione...</option>
                         <option value="aluno">Aluno</option>
@@ -26,10 +26,9 @@
                         <option value="coordenador">Coordenador</option>
                     </select>
                 </div>
-                <button type="submit" class="w-full py-2 px-4 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-lg shadow-md transition duration-200">Avançar</button>
-                <!-- Removido link para Painel/Dashboard -->
+                <button type="submit" class="w-full py-2 px-4 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-lg shadow-md transition">Avançar</button>
                 <div class="text-center mt-4">
-                    <a href="{{ route('login') }}" class="text-sm text-gray-600 hover:text-indigo-600">Já tem uma conta? Entrar</a>
+                    <a href="{{ route('login') }}" class="text-sm text-gray-700 hover:text-indigo-700">Já tem uma conta? Entrar</a>
                 </div>
             </form>
         </div>

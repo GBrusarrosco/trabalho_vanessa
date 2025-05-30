@@ -37,3 +37,19 @@ textarea:focus {
 .dark\:text-gray-100 {
     color: #222 !important;
 }
+
+/* Botão escuro padrão do sistema */
+.btn-dark {
+    background-color: #18181b;
+    color: #fff;
+    font-weight: 600;
+    border-radius: 0.5rem;
+    box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+    transition: background 0.2s, color 0.2s;
+}
+
+.btn-dark:hover,
+.btn-dark:focus {
+    background-color: #3730a3;
+    color: #fff;
+}

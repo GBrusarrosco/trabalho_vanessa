@@ -14,15 +14,15 @@
 </div>
 
 @if (!isset($student))
-    <div class="mb-4">
-        <label for="password" class="block text-sm font-medium text-gray-700 mb-1">Senha</label>
-        <input type="password" name="password" class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:ring-2 focus:ring-indigo-500 bg-white text-gray-900" required>
-    </div>
+<div class="mb-4">
+    <label for="password" class="block text-sm font-medium text-gray-700 mb-1">Senha</label>
+    <input type="password" name="password" class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:ring-2 focus:ring-indigo-500 bg-white text-gray-900" required>
+</div>
 
-    <div class="mb-4">
-        <label for="password_confirmation" class="block text-sm font-medium text-gray-700 mb-1">Confirmar Senha</label>
-        <input type="password" name="password_confirmation" class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:ring-2 focus:ring-indigo-500 bg-white text-gray-900" required>
-    </div>
+<div class="mb-4">
+    <label for="password_confirmation" class="block text-sm font-medium text-gray-700 mb-1">Confirmar Senha</label>
+    <input type="password" name="password_confirmation" class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:ring-2 focus:ring-indigo-500 bg-white text-gray-900" required>
+</div>
 @endif
 
 <div class="mb-4">

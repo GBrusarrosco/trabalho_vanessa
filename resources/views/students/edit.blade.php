@@ -7,7 +7,7 @@
         @csrf
         @method('PUT')
         @include('students.form')
-        <button type="submit" class="w-full py-2 px-4 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-lg shadow-md transition">Atualizar</button>
+        <button type="submit" class="w-full py-2 px-4 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-lg shadow-md transition">Atualizar</button>
     </form>
 </div>
 @endsection
