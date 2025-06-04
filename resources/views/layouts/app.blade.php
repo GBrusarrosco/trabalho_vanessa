@@ -7,20 +7,20 @@
 
     <title>{{ config('app.name', 'Laravel') }}</title>
 
-    <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.bunny.net" />
     <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
 
-    <!-- Styles and Scripts -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
-<body class="font-sans antialiased">
-<div class="min-h-screen bg-gray-100 dark:bg-gray-900">
+<body class="font-sans antialiased text-paragraph"> {{-- Cor de texto padrão para o corpo --}}
+{{-- Fundo geral da página usando a cor da sua paleta (consistente com seu app.css) --}}
+<div class="min-h-screen bg-light-gray-bg">
     @include('layouts.navigation')
 
     @isset($header)
-        <header class="bg-white dark:bg-gray-800 shadow">
+        <header class="bg-background shadow"> {{-- Fundo do cabeçalho com a cor 'background' (branco) --}}
             <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+                {{-- O conteúdo do $header (título) deve ser estilizado na view específica. Ex: text-headline --}}
                 {{ $header }}
             </div>
         </header>

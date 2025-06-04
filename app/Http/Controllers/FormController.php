@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Form;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Gate;
 
 class FormController extends Controller
 {
@@ -26,13 +27,16 @@ class FormController extends Controller
             'description' => 'nullable',
         ]);
 
-        Form::create([
+        $form = Form::create([ // Salve a instância do formulário criado
             'title' => $request->title,
             'description' => $request->description,
             'is_validated' => false,
+            'creator_user_id' => Auth::id(),
         ]);
 
-        return redirect()->route('forms.index')->with('success', 'Formulário criado!');
+        // Redireciona para a página de edição do formulário recém-criado
+        // para que o usuário possa adicionar perguntas
+        return redirect()->route('forms.edit', $form->id)->with('success', 'Formulário criado! Adicione as perguntas abaixo.');
     }
 
     public function edit(Form $form)
@@ -59,6 +63,8 @@ class FormController extends Controller
 
     public function validateForm(Form $form)
     {
+        Gate::authorize('validate-form', $form);
+
         $form->update([
             'is_validated' => true,
             'validated_by' => Auth::id(),

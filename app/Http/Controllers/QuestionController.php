@@ -14,10 +14,11 @@ class QuestionController extends Controller
         return view('questions.index', compact('questions'));
     }
 
-    public function create()
+    public function create(Request $request)
     {
         $forms = Form::all();
-        return view('questions.create', compact('forms'));
+        $selected_form_id = $request->query('form_id');
+        return view('questions.create', compact('forms', 'selected_form_id'));
     }
 
     public function store(Request $request)
