@@ -1,15 +1,14 @@
-@extends('layouts.app')
+<x-app-layout>
+    <x-slot name="header">
+        <h2 class="font-semibold text-2xl text-headline leading-tight">
+            Nova Pergunta
+            @if($selected_form_id && ($selectedForm = $forms->firstWhere('id', $selected_form_id)))
+                para o Formulário: <span class="text-primary">{{ $selectedForm->title }}</span>
+            @endif
+        </h2>
+    </x-slot>
 
-@section('header')
-    <h2 class="font-semibold text-2xl text-headline leading-tight">
-        Nova Pergunta
-        @if($selected_form_id && ($selectedForm = $forms->firstWhere('id', $selected_form_id)))
-            para o Formulário: <span class="text-primary">{{ $selectedForm->title }}</span>
-        @endif
-    </h2>
-@endsection
-
-@section('content')
+    {{-- Conteúdo principal da página --}}
     <div class="py-12">
         <div class="max-w-3xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-background overflow-hidden shadow-xl sm:rounded-lg">
@@ -119,4 +118,4 @@
             </div>
         </div>
     </div>
-@endsection
+</x-app-layout>

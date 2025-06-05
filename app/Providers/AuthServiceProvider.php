@@ -34,10 +34,11 @@ class AuthServiceProvider extends ServiceProvider
         });
 
         Gate::define('view-reports', function (User $user) {
+            // dd($user->name, $user->email, $user->role); // << COMENTE OU REMOVA ESTA LINHA
             return in_array($user->role, ['admin', 'coordenador', 'professor']);
         });
 
-        Gate::define('validate-form', function (User $user, Form $form) {
+        Gate::define('validate-form', function (User $user, Form $form) { // Passa $form
             return $user->role === 'admin' || $user->role === 'coordenador';
         });
     }

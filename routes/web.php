@@ -36,10 +36,14 @@ Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 Route::get('/dashboard', [DashboardController::class, 'index']) // Nova rota
 ->middleware(['auth', 'verified'])->name('dashboard');
 
+Route::middleware(['auth'])->group(function () {
+    Route::get('/relatorio', [ReportController::class, 'index'])
+        ->name('report.index'); // SEM o middleware 'can:view-reports' por enquanto
+});
 
 Route::middleware(['auth'])->group(function () {
 
-    Route::get('/relatorio', [ReportController::class, 'index'])->name('report.index')->middleware('can:view-reports');
+    // Em web.php
 
 
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');

@@ -1,13 +1,11 @@
-@extends('layouts.app')
+<x-app-layout>
+    <x-slot name="header">
+        <h2 class="font-semibold text-2xl text-headline leading-tight">
+            Gerenciamento de Perguntas
+        </h2>
+    </x-slot>
 
-@section('header')
-    <h2 class="font-semibold text-2xl text-headline leading-tight">
-        Gerenciamento de Perguntas
-    </h2>
-@endsection
-
-@section('content')
-    {{-- Envolvemos a seção com x-data para o modal de exclusão de pergunta --}}
+    {{-- Conteúdo principal da página, que será injetado no $slot do layouts.app.blade.php --}}
     <div class="py-12" x-data="{ questionIdToDelete: null }">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
 
@@ -61,12 +59,10 @@
                                 <a href="{{ route('questions.edit', $question->id) }}"
                                    class="text-indigo-600 hover:text-primary font-semibold hover:underline">Editar</a>
 
-                                {{-- Formulário de exclusão, agora oculto e acionado pelo modal --}}
                                 <form id="deleteQuestionForm-{{ $question->id }}" action="{{ route('questions.destroy', $question->id) }}" method="POST" class="hidden">
                                     @csrf
                                     @method('DELETE')
                                 </form>
-                                {{-- Botão que abre o modal --}}
                                 <button type="button"
                                         @click.prevent="questionIdToDelete = 'deleteQuestionForm-{{ $question->id }}'; $dispatch('open-modal', 'confirm-question-deletion')"
                                         class="text-danger hover:text-red-700 font-semibold hover:underline">
@@ -106,5 +102,5 @@
                 </div>
             </div>
         </x-modal>
-    </div>
-@endsection
+    </div> {{-- Fim do div principal do conteúdo da página --}}
+</x-app-layout>

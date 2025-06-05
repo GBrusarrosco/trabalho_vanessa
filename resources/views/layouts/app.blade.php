@@ -12,22 +12,44 @@
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
-<body class="font-sans antialiased text-paragraph"> {{-- Cor de texto padrão para o corpo --}}
-{{-- Fundo geral da página usando a cor da sua paleta (consistente com seu app.css) --}}
+<body class="font-sans antialiased text-paragraph">
 <div class="min-h-screen bg-light-gray-bg">
     @include('layouts.navigation')
 
     @isset($header)
-        <header class="bg-background shadow"> {{-- Fundo do cabeçalho com a cor 'background' (branco) --}}
+        <header class="bg-background shadow">
             <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-                {{-- O conteúdo do $header (título) deve ser estilizado na view específica. Ex: text-headline --}}
                 {{ $header }}
             </div>
         </header>
     @endisset
 
-    <main>
-        @yield('content')
+    <main x-data="{ showContent: false }"
+          x-init="
+          showContent = false; // Reseta no início
+          const initAnimation = () => {
+              showContent = false;
+              requestAnimationFrame(() => {
+                  setTimeout(() => {
+                      showContent = true;
+                  }, 50);
+              });
+          };
+          initAnimation(); // Executa na carga inicial
+
+          // Para Turbo (se estiver usando) - descomente se necessário
+          // document.addEventListener('turbo:load', initAnimation);
+
+          // Para bfcache (navegação de voltar/avançar do navegador)
+          window.addEventListener('pageshow', function(event) {
+              if (event.persisted) {
+                  initAnimation();
+              }
+          });
+      "
+          class="transition-all duration-700 ease-in-out" {{-- Sua duração e easing --}}
+          :class="{ 'opacity-100 translate-y-0': showContent, 'opacity-0 translate-y-5': !showContent }"> {{-- Seu translate --}}
+        {{ $slot }}
     </main>
 </div>
 </body>

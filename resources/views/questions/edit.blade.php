@@ -1,28 +1,26 @@
-@extends('layouts.app')
+<x-app-layout>
+    <x-slot name="header">
+        <h2 class="font-semibold text-2xl text-headline leading-tight">
+            Editar Pergunta
+            @if($question->form)
+                <span class="text-base font-normal text-paragraph block sm:inline sm:ml-2">
+                    (Formulário: {{ $question->form->title }})
+                </span>
+            @endif
+        </h2>
+    </x-slot>
 
-@section('header')
-    <h2 class="font-semibold text-2xl text-headline leading-tight">
-        Editar Pergunta
-        @if($question->form)
-            <span class="text-base font-normal text-paragraph block sm:inline sm:ml-2">
-                (Formulário: {{ $question->form->title }})
-            </span>
-        @endif
-    </h2>
-@endsection
-
-@section('content')
+    {{-- Conteúdo principal da página --}}
     <div class="py-12">
         <div class="max-w-3xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-background overflow-hidden shadow-xl sm:rounded-lg">
-                {{-- Alpine.js para gerenciar opções dinâmicas --}}
                 <form method="POST" action="{{ route('questions.update', $question->id) }}"
                       class="p-6 sm:p-8 space-y-6"
                       x-data="{
                           questionType: '{{ old('type', $question->type) }}',
                           options: {{ json_encode(old('options', $question->options ?? [''])) }}
                       }"
-                      x-init="if (options.length === 0) options = ['']">
+                      x-init="if (options.length === 0 && questionType === 'multipla_escolha') options = ['']; else if (questionType !== 'multipla_escolha') options = [];">
                     @csrf
                     @method('PUT')
 
@@ -61,8 +59,8 @@
                         <select name="type" id="type" x-model="questionType"
                                 class="block w-full px-4 py-3 rounded-lg shadow-sm border-gray-300 focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 text-paragraph bg-white @error('type') border-danger @enderror"
                                 required>
-                            <option value="texto">Texto</option>
-                            <option value="multipla_escolha">Múltipla Escolha</option>
+                            <option value="texto" {{ old('type', $question->type) === 'texto' ? 'selected' : '' }}>Texto</option>
+                            <option value="multipla_escolha" {{ old('type', $question->type) === 'multipla_escolha' ? 'selected' : '' }}>Múltipla Escolha</option>
                         </select>
                         @error('type')
                         <p class="text-danger text-xs mt-1">{{ $message }}</p>
@@ -83,10 +81,10 @@
                                 </button>
                             </div>
                         </template>
-                        @error('options') {{-- Erro geral para o array de opções --}}
+                        @error('options')
                         <p class="text-danger text-xs mt-1">{{ $message }}</p>
                         @enderror
-                        @error('options.*') {{-- Erros individuais para cada opção --}}
+                        @error('options.*')
                         <p class="text-danger text-xs mt-1">{{ $message }}</p>
                         @enderror
                         <button type="button" @click="options.push('')"
@@ -95,12 +93,11 @@
                         </button>
                     </div>
 
-
                     {{-- Botões de Ação --}}
                     <div class="mt-8 pt-5 border-t border-secondary">
                         <div class="flex justify-end space-x-3">
-                            <a href="{{ route('forms.edit', $question->form_id) }}" {{-- Voltar para edição do formulário --}}
-                            class="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-paragraph bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary">
+                            <a href="{{ route('forms.edit', $question->form_id) }}"
+                               class="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-paragraph bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary">
                                 Voltar ao Formulário
                             </a>
                             <button type="submit"
@@ -113,4 +110,4 @@
             </div>
         </div>
     </div>
-@endsection
+</x-app-layout>

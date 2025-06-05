@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers; // << GARANTA QUE ESTE NAMESPACE ESTÁ CORRETO
+namespace App\Http\Controllers;
 
 use App\Models\Form;
 use App\Models\Question;
@@ -10,7 +10,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
-class DashboardController extends Controller // << GARANTA QUE O NOME DA CLASSE ESTÁ CORRETO
+class DashboardController extends Controller
 {
     public function index()
     {
@@ -19,33 +19,40 @@ class DashboardController extends Controller // << GARANTA QUE O NOME DA CLASSE 
         $recentItems = [];
 
         // Informações gerais (visíveis para Admin/Coordenador)
-        if ($user->role === 'admin' || $user->role === 'coordenador') {
+        if ($user && ($user->role === 'admin' || $user->role === 'coordenador')) { // Adicionado $user &&
             $stats['total_forms'] = Form::count();
             $stats['pending_forms'] = Form::where('is_validated', false)->count();
             $stats['approved_forms'] = Form::where('is_validated', true)->count();
-            // $stats['expired_forms'] = Form::where('expires_at', '<', now())->count(); // Exigiria campo 'expires_at'
+            // $stats['expired_forms'] = Form::where('expires_at', '<', now())->count();
 
             $stats['total_students'] = Student::count();
             $stats['total_teachers'] = Teacher::count();
         }
 
         // Informações específicas para Professor
-        if ($user->role === 'professor') {
+        if ($user && $user->role === 'professor') { // Adicionado $user &&
             $stats['my_forms_count'] = Form::where('creator_user_id', $user->id)->count();
-            $stats['my_pending_forms'] = Form::where('creator_user_id', $user->id)->where('is_validated', false)->count();
+
+            // Para depurar especificamente os formulários pendentes do professor:
+            $myPendingFormsForDebug = Form::where('creator_user_id', $user->id)
+                ->where('is_validated', false)
+                ->get(); // Pega a coleção para inspecionar
+            $stats['my_pending_forms'] = $myPendingFormsForDebug->count(); // Depois conta
+
             $stats['my_approved_forms'] = Form::where('creator_user_id', $user->id)->where('is_validated', true)->count();
             $recentItems['my_recent_forms'] = Form::where('creator_user_id', $user->id)->latest()->take(3)->get();
+
+            // LINHA DE DEBUG PRINCIPAL:
+            // Descomente a linha abaixo para ver o ID do usuário, os formulários pendentes que foram encontrados e a contagem.
+            // dd('Usuário Professor ID: ' . $user->id, 'Formulários Pendentes Encontrados:', $myPendingFormsForDebug, 'Contagem Pendentes: ' . $stats['my_pending_forms'], 'Todos os Stats para Professor:', $stats);
         }
 
         // Informações específicas para Aluno
-        if ($user->role === 'aluno') {
+        if ($user && $user->role === 'aluno') { // Adicionado $user &&
             $student = $user->student;
             if ($student) {
                 $assignedFormsQuery = $student->forms()->where('is_validated', true);
-
-                // Clonar a query para não afetar a contagem total ao adicionar o whereNotIn
                 $pendingFormsQuery = clone $assignedFormsQuery;
-
                 $answeredFormsIds = $student->answers()->join('questions', 'answers.question_id', '=', 'questions.id')
                     ->select('questions.form_id')->distinct()->pluck('form_id');
 
@@ -61,11 +68,14 @@ class DashboardController extends Controller // << GARANTA QUE O NOME DA CLASSE 
         }
 
         // Para Coordenador, listar formulários pendentes de validação
-        if ($user->role === 'coordenador') {
+        if ($user && $user->role === 'coordenador') { // Adicionado $user &&
             $recentItems['forms_pending_validation'] = Form::where('is_validated', false)
-                ->with('creator') // Carregar quem criou
+                ->with('creator')
                 ->latest()->take(5)->get();
         }
+
+
+//         dd($user->role, $stats, $recentItems); // Descomente esta linha
 
         return view('dashboard', compact('user', 'stats', 'recentItems'));
     }
