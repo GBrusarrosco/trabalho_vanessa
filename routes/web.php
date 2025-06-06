@@ -1,7 +1,8 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\{DashboardController,
+use App\Http\Controllers\{
+    DashboardController,
     ProfileController,
     QuestionController,
     ReportController,
@@ -10,7 +11,8 @@ use App\Http\Controllers\{DashboardController,
     CoordinatorController,
     FormController,
     StudentFormController,
-    AnswerController};
+    AnswerController
+};
 
 use App\Http\Controllers\AuthController; // Importação correta
 
@@ -34,11 +36,11 @@ Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 //})->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::get('/dashboard', [DashboardController::class, 'index']) // Nova rota
-->middleware(['auth', 'verified'])->name('dashboard');
+    ->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::middleware(['auth'])->group(function () {
-    Route::get('/relatorio', [ReportController::class, 'index'])
-        ->name('report.index'); // SEM o middleware 'can:view-reports' por enquanto
+    // Permite acesso ao relatório para admin, coordenador, professor e aluno autenticado
+    Route::get('/relatorio', [ReportController::class, 'index'])->name('report.index');
 });
 
 Route::middleware(['auth'])->group(function () {
@@ -55,6 +57,9 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('teachers', TeacherController::class)->middleware('can:manage-teachers');
     Route::resource('coordinators', CoordinatorController::class)->middleware('can:manage-coordinators');
 
+    Route::get('students/{student}/mini-report', [\App\Http\Controllers\StudentController::class, 'miniReport'])
+        ->middleware(['auth'])
+        ->name('students.mini-report');
 
     Route::resource('questions', QuestionController::class);
     Route::resource('forms', FormController::class);

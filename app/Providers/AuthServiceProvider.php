@@ -41,5 +41,16 @@ class AuthServiceProvider extends ServiceProvider
         Gate::define('validate-form', function (User $user, Form $form) { // Passa $form
             return $user->role === 'admin' || $user->role === 'coordenador';
         });
+
+        Gate::define('manage-students', function (User $user, ?User $targetUser = null) {
+            // Admin e coordenador podem tudo, aluno só pode ver/editar a si mesmo
+            if (in_array($user->role, ['admin', 'coordenador'])) {
+                return true;
+            }
+            if ($user->role === 'aluno' && $targetUser && $user->id === $targetUser->id) {
+                return true;
+            }
+            return false;
+        });
     }
 }
