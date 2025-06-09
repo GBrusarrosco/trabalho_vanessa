@@ -73,3 +73,4 @@ Route::middleware(['auth'])->group(function () {
     Route::get('forms/{form}/responder', [AnswerController::class, 'showForm'])->name('forms.responder');
     Route::post('forms/{form}/responder', [AnswerController::class, 'store'])->name('forms.enviar');
 });
+

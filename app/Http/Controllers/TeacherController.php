@@ -5,9 +5,12 @@ namespace App\Http\Controllers;
 use App\Models\Teacher;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth; // Importe a facade Auth
+use Illuminate\Support\Facades\Hash;  // Importe a facade Hash
 
 class TeacherController extends Controller
 {
+    // ... (métodos index e create permanecem iguais) ...
     public function index()
     {
         $teachers = Teacher::with('user')->get();
@@ -29,23 +32,30 @@ class TeacherController extends Controller
             'area' => 'required',
         ]);
 
+        // Cria o registro na tabela de usuários
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
             'document' => $request->document,
-            'password' => bcrypt($request->password),
+            'password' => Hash::make($request->password), // Use Hash::make
             'role' => 'professor',
         ]);
 
+        // Pega o usuário Coordenador que está logado
+        $loggedInCoordinator = Auth::user()->coordinator;
+
+        // Cria o registro na tabela de professores, associando ao coordenador logado
         Teacher::create([
             'user_id' => $user->id,
             'area' => $request->area,
             'observacoes' => $request->observacoes,
+            'coordinator_id' => $loggedInCoordinator ? $loggedInCoordinator->id : null,
         ]);
 
-        return redirect()->route('teachers.index')->with('success', 'Professor cadastrado!');
+        return redirect()->route('teachers.index')->with('success', 'Professor cadastrado com sucesso!');
     }
 
+    // ... (métodos edit, update, destroy permanecem iguais por enquanto) ...
     public function edit(Teacher $teacher)
     {
         return view('teachers.edit', compact('teacher'));
@@ -77,4 +87,3 @@ class TeacherController extends Controller
         return redirect()->route('teachers.index')->with('success', 'Professor excluído!');
     }
 }
-

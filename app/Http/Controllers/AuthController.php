@@ -44,7 +44,7 @@ class AuthController extends Controller
             'email' => 'required|string|email|max:255|unique:users',
             'document' => 'required|string|max:255|unique:users,document',
             'password' => 'required|string|min:6|confirmed',
-            'type' => 'required|in:aluno,professor,coordenador', // Campo para determinar o tipo de usuário
+            'type' => 'required|in:aluno,coordenador', // Campo para determinar o tipo de usuário
 
             // Campos condicionais baseados no 'type'
             'turma' => 'required_if:type,aluno|nullable|string|max:255',

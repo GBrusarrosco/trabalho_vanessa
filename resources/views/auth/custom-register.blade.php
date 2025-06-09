@@ -82,18 +82,19 @@
                     {{-- Erro para password_confirmation é geralmente tratado pelo erro de 'password' se a confirmação falhar --}}
                 </div>
 
+                {{-- Dentro do arquivo custom-register.blade.php --}}
                 <div>
                     <label for="type" class="block text-sm font-semibold text-gray-700 mb-1">Eu sou um(a):</label>
                     <select id="type" name="type" required
-                            class="block w-full px-4 py-3 rounded-lg shadow-sm border-gray-300 focus:border-indigo-500 focus:ring focus:ring-indigo-500 focus:ring-opacity-50 text-gray-800 bg-white @error('type') border-red-500 @enderror"
+                            class="block w-full px-4 py-3 rounded-lg shadow-sm border-gray-300 focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 text-gray-800 bg-white @error('type') border-danger @enderror"
                             onchange="toggleProfileFields()">
                         <option value="">Selecione seu perfil...</option>
                         <option value="aluno" {{ old('type') === 'aluno' ? 'selected' : '' }}>Aluno</option>
-                        <option value="professor" {{ old('type') === 'professor' ? 'selected' : '' }}>Professor</option>
+                        {{-- A opção de se cadastrar como Professor foi removida --}}
                         <option value="coordenador" {{ old('type') === 'coordenador' ? 'selected' : '' }}>Coordenador</option>
                     </select>
                     @error('type')
-                    <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                    <p class="text-danger text-xs mt-1">{{ $message }}</p>
                     @enderror
                 </div>
 
