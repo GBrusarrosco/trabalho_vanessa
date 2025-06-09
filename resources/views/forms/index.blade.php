@@ -95,6 +95,9 @@
                             <th scope="col" class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
                                 Descrição
                             </th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                                Criado por
+                            </th>
                             <th scope="col" class="px-6 py-3 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">
                                 Validação
                             </th>
@@ -113,6 +116,13 @@
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-paragraph">
                                     {{ Str::limit($form->description, 60) ?: '-' }}
                                 </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-paragraph">
+                                    @if (Auth::user()->role === 'coordenador' && $form->creator)
+                                        {{ $form->creator->name }}
+                                    @else
+                                        -
+                                    @endif
+                                </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-center">
                                     @if ($form->is_validated)
                                         <span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
@@ -124,7 +134,7 @@
                                     </span>
                                     @endif
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-3">
+                                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                     @if (!$form->is_validated && (Auth::user()->role === 'coordenador' || Auth::user()->role === 'admin'))
                                         <form action="{{ route('forms.validate', $form) }}" method="POST" class="inline-block">
                                             @csrf
@@ -133,9 +143,17 @@
                                                 Validar
                                             </button>
                                         </form>
+                                        @if (Auth::user()->role === 'coordenador')
+                                            <span class="mx-1 text-gray-400">|</span>
+                                        @endif
                                     @endif
+
                                     <a href="{{ route('forms.edit', $form) }}"
                                        class="text-primary hover:text-indigo-900 font-semibold hover:underline" title="Editar Formulário">Editar</a>
+
+                                    @if (Auth::user()->role === 'coordenador')
+                                        <span class="mx-1 text-gray-400">|</span>
+                                    @endif
 
                                     <form id="deleteForm-{{ $form->id }}" action="{{ route('forms.destroy', $form) }}" method="POST" class="hidden">
                                         @csrf
@@ -143,14 +161,14 @@
                                     </form>
                                     <button type="button"
                                             @click.prevent="formIdToDelete = 'deleteForm-{{ $form->id }}'; $dispatch('open-modal', 'confirm-form-deletion')"
-                                            class="text-danger hover:text-red-700 font-semibold hover:underline focus:outline-none" title="Excluir Formulário">
+                                            class="text-danger hover:text-red-700 font-semibold hover:underline focus:outline-none @if (Auth::user()->role === 'coordenador') ml-0 @endif" title="Excluir Formulário">
                                         Excluir
                                     </button>
                                 </td>
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="4" class="px-6 py-4 whitespace-nowrap text-sm text-paragraph text-center italic">
+                                <td colspan="5" class="px-6 py-4 whitespace-nowrap text-sm text-paragraph text-center italic">
                                     Nenhum formulário cadastrado ainda.
                                 </td>
                             </tr>

@@ -11,7 +11,7 @@ class FormController extends Controller
 {
     public function index()
     {
-        $forms = Form::all();
+        $forms = Form::with('creator')->get();
         return view('forms.index', compact('forms'));
     }
 
