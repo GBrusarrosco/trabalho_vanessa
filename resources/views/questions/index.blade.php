@@ -5,7 +5,7 @@
         </h2>
     </x-slot>
 
-    {{-- Conteúdo principal da página, que será injetado no $slot do layouts.app.blade.php --}}
+    {{-- Conteúdo principal da página --}}
     <div class="py-12" x-data="{ questionIdToDelete: null }">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
 
@@ -13,10 +13,14 @@
                 <h1 class="text-3xl font-bold text-headline mb-4 sm:mb-0">
                     Perguntas Cadastradas
                 </h1>
-                <a href="{{ route('questions.create') }}"
-                   class="inline-flex items-center px-4 py-2 bg-primary border border-transparent rounded-md font-semibold text-xs text-button-text uppercase tracking-widest hover:bg-opacity-90 active:bg-primary focus:outline-none focus:border-primary focus:ring focus:ring-indigo-200 disabled:opacity-25 transition">
-                    Nova Pergunta
-                </a>
+
+                {{-- 1. Condição para exibir o botão apenas para admin e professor --}}
+                @if(in_array(Auth::user()->role, ['admin', 'professor']))
+                    <a href="{{ route('questions.create') }}"
+                       class="inline-flex items-center px-4 py-2 bg-primary border border-transparent rounded-md font-semibold text-xs text-button-text uppercase tracking-widest hover:bg-opacity-90 active:bg-primary focus:outline-none focus:border-primary focus:ring focus:ring-indigo-200 disabled:opacity-25 transition">
+                        Nova Pergunta
+                    </a>
+                @endif
             </div>
 
             @if(session('success'))
@@ -38,9 +42,13 @@
                         <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-paragraph uppercase tracking-wider">
                             Tipo
                         </th>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-paragraph uppercase tracking-wider">
-                            Ações
-                        </th>
+
+                        {{-- 2. Condição para exibir o CABEÇALHO da coluna Ações --}}
+                        @if(in_array(Auth::user()->role, ['admin', 'professor']))
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-paragraph uppercase tracking-wider">
+                                Ações
+                            </th>
+                        @endif
                     </tr>
                     </thead>
                     <tbody class="bg-background divide-y divide-secondary">
@@ -55,24 +63,29 @@
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-paragraph">
                                 {{ ucfirst(str_replace('_', ' ', $question->type)) }}
                             </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
-                                <a href="{{ route('questions.edit', $question->id) }}"
-                                   class="text-indigo-600 hover:text-primary font-semibold hover:underline">Editar</a>
 
-                                <form id="deleteQuestionForm-{{ $question->id }}" action="{{ route('questions.destroy', $question->id) }}" method="POST" class="hidden">
-                                    @csrf
-                                    @method('DELETE')
-                                </form>
-                                <button type="button"
-                                        @click.prevent="questionIdToDelete = 'deleteQuestionForm-{{ $question->id }}'; $dispatch('open-modal', 'confirm-question-deletion')"
-                                        class="text-danger hover:text-red-700 font-semibold hover:underline">
-                                    Excluir
-                                </button>
-                            </td>
+                            {{-- 3. Condição para exibir o CONTEÚDO da coluna Ações --}}
+                            @if(in_array(Auth::user()->role, ['admin', 'professor']))
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
+                                    <a href="{{ route('questions.edit', $question->id) }}"
+                                       class="text-indigo-600 hover:text-primary font-semibold hover:underline">Editar</a>
+
+                                    <form id="deleteQuestionForm-{{ $question->id }}" action="{{ route('questions.destroy', $question->id) }}" method="POST" class="hidden">
+                                        @csrf
+                                        @method('DELETE')
+                                    </form>
+                                    <button type="button"
+                                            @click.prevent="questionIdToDelete = 'deleteQuestionForm-{{ $question->id }}'; $dispatch('open-modal', 'confirm-question-deletion')"
+                                            class="text-danger hover:text-red-700 font-semibold hover:underline">
+                                        Excluir
+                                    </button>
+                                </td>
+                            @endif
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="4" class="px-6 py-4 whitespace-nowrap text-sm text-paragraph text-center">
+                            {{-- 4. Ajuste dinâmico do colspan para a tabela vazia --}}
+                            <td colspan="{{ in_array(Auth::user()->role, ['admin', 'professor']) ? 4 : 3 }}" class="px-6 py-4 whitespace-nowrap text-sm text-paragraph text-center">
                                 Nenhuma pergunta encontrada.
                             </td>
                         </tr>
@@ -102,5 +115,5 @@
                 </div>
             </div>
         </x-modal>
-    </div> {{-- Fim do div principal do conteúdo da página --}}
+    </div>
 </x-app-layout>

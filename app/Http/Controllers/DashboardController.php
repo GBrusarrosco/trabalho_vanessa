@@ -19,63 +19,60 @@ class DashboardController extends Controller
         $recentItems = [];
 
         // Informações gerais (visíveis para Admin/Coordenador)
-        if ($user && ($user->role === 'admin' || $user->role === 'coordenador')) { // Adicionado $user &&
+        if ($user->role === 'admin' || $user->role === 'coordenador') {
             $stats['total_forms'] = Form::count();
-            $stats['pending_forms'] = Form::where('is_validated', false)->count();
-            $stats['approved_forms'] = Form::where('is_validated', true)->count();
-            // $stats['expired_forms'] = Form::where('expires_at', '<', now())->count();
+            // CORRIGIDO: Usa o campo 'status' em vez de 'is_validated'
+            $stats['pending_forms'] = Form::where('status', 'pendente')->count();
+            $stats['approved_forms'] = Form::where('status', 'aprovado')->count();
 
             $stats['total_students'] = Student::count();
             $stats['total_teachers'] = Teacher::count();
         }
 
         // Informações específicas para Professor
-        if ($user && $user->role === 'professor') { // Adicionado $user &&
+        if ($user->role === 'professor') {
             $stats['my_forms_count'] = Form::where('creator_user_id', $user->id)->count();
+            // CORRIGIDO: Usa o campo 'status' em vez de 'is_validated'
+            $stats['my_pending_forms'] = Form::where('creator_user_id', $user->id)->where('status', 'pendente')->count();
+            $stats['my_approved_forms'] = Form::where('creator_user_id', $user->id)->where('status', 'aprovado')->count();
 
-            // Para depurar especificamente os formulários pendentes do professor:
-            $myPendingFormsForDebug = Form::where('creator_user_id', $user->id)
-                ->where('is_validated', false)
-                ->get(); // Pega a coleção para inspecionar
-            $stats['my_pending_forms'] = $myPendingFormsForDebug->count(); // Depois conta
-
-            $stats['my_approved_forms'] = Form::where('creator_user_id', $user->id)->where('is_validated', true)->count();
             $recentItems['my_recent_forms'] = Form::where('creator_user_id', $user->id)->latest()->take(3)->get();
-
-            // LINHA DE DEBUG PRINCIPAL:
-            // Descomente a linha abaixo para ver o ID do usuário, os formulários pendentes que foram encontrados e a contagem.
-            // dd('Usuário Professor ID: ' . $user->id, 'Formulários Pendentes Encontrados:', $myPendingFormsForDebug, 'Contagem Pendentes: ' . $stats['my_pending_forms'], 'Todos os Stats para Professor:', $stats);
         }
 
         // Informações específicas para Aluno
-        if ($user && $user->role === 'aluno') { // Adicionado $user &&
+        if ($user->role === 'aluno') {
             $student = $user->student;
             if ($student) {
-                $assignedFormsQuery = $student->forms()->where('is_validated', true);
+                // Nova lógica: Busca formulários baseados na turma do aluno
+                // CORRIGIDO: Usa o campo 'status' em vez de 'is_validated'
+                $assignedFormsQuery = Form::where('status', 'aprovado')
+                    ->where('turma', $student->turma)
+                    ->where('ano_letivo', $student->ano_letivo);
+
                 $pendingFormsQuery = clone $assignedFormsQuery;
+
                 $answeredFormsIds = $student->answers()->join('questions', 'answers.question_id', '=', 'questions.id')
                     ->select('questions.form_id')->distinct()->pluck('form_id');
 
                 $stats['total_assigned_forms'] = $assignedFormsQuery->count();
                 $stats['pending_forms_to_answer'] = $pendingFormsQuery->whereNotIn('forms.id', $answeredFormsIds)->count();
 
-                $recentItems['forms_to_answer'] = $student->forms()
-                    ->where('is_validated', true)
+                $recentItems['forms_to_answer'] = Form::where('status', 'aprovado')
+                    ->where('turma', $student->turma)
+                    ->where('ano_letivo', $student->ano_letivo)
                     ->whereNotIn('forms.id', $answeredFormsIds)
-                    ->latest('student_form.created_at')
+                    ->latest()
                     ->take(3)->get();
             }
         }
 
         // Para Coordenador, listar formulários pendentes de validação
-        if ($user && $user->role === 'coordenador') { // Adicionado $user &&
-            $recentItems['forms_pending_validation'] = Form::where('is_validated', false)
+        if ($user->role === 'coordenador') {
+            // CORRIGIDO: Usa o campo 'status' em vez de 'is_validated'
+            $recentItems['forms_pending_validation'] = Form::where('status', 'pendente')
                 ->with('creator')
                 ->latest()->take(5)->get();
         }
-
-
-//         dd($user->role, $stats, $recentItems); // Descomente esta linha
 
         return view('dashboard', compact('user', 'stats', 'recentItems'));
     }

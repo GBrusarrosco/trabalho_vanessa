@@ -9,73 +9,20 @@
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             @php $user = Auth::user(); @endphp
 
-            {{-- SEÇÃO PARA O ALUNO --}}
-            @if($user && $user->role === 'aluno')
-                <div class="bg-background shadow-xl sm:rounded-lg p-8">
-                    <div class="text-center">
-                        <h2 class="text-2xl font-bold text-headline mb-4">Formulários Disponíveis</h2>
-                        <p class="text-paragraph mb-8">Aqui você pode visualizar os formulários atribuídos a você e o status de cada um.</p>
-                    </div>
-
-                    <div class="overflow-x-auto rounded-lg shadow border border-secondary">
-                        <table class="min-w-full bg-white">
-                            {{-- CABEÇALHO DA TABELA DO ALUNO - CORRIGIDO --}}
-                            <thead class="bg-background border-b-2 border-gray-200">
-                            <tr>
-                                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Título</th>
-                                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Descrição</th>
-                                <th class="px-6 py-3 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">Status</th>
-                                <th class="px-6 py-3 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">Ação</th>
-                            </tr>
-                            </thead>
-                            <tbody class="divide-y divide-gray-200">
-                            @php
-                                $student = $user->student;
-                                $assignedForms = $student ? $student->forms()->where('is_validated', true)->get() : collect();
-                                $answeredFormIds = $student ? $student->answers()->join('questions', 'answers.question_id', '=', 'questions.id')->select('questions.form_id')->distinct()->pluck('form_id')->toArray() : [];
-                            @endphp
-                            @forelse($assignedForms as $form)
-                                <tr class="hover:bg-gray-50 transition-colors duration-150">
-                                    <td class="px-6 py-4 font-semibold text-headline whitespace-nowrap">{{ $form->title }}</td>
-                                    <td class="px-6 py-4 text-paragraph whitespace-nowrap">{{ Str::limit($form->description, 60) ?: '-' }}</td>
-                                    <td class="px-6 py-4 text-center">
-                                        @if(in_array($form->id, $answeredFormIds))
-                                            <span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">Respondido</span>
-                                        @else
-                                            <span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">Pendente</span>
-                                        @endif
-                                    </td>
-                                    <td class="px-6 py-4 text-center">
-                                        @if(!in_array($form->id, $answeredFormIds))
-                                            <a href="{{ route('forms.responder', $form->id) }}" class="inline-flex items-center px-4 py-2 bg-primary border border-transparent rounded-md font-semibold text-xs text-button-text uppercase tracking-widest hover:bg-opacity-90 transition">Responder</a>
-                                        @else
-                                            <span class="text-gray-400 italic">Já respondido</span>
-                                        @endif
-                                    </td>
-                                </tr>
-                            @empty
-                                <tr>
-                                    <td colspan="4" class="px-6 py-4 text-center text-paragraph italic">Nenhum formulário atribuído a você no momento.</td>
-                                </tr>
-                            @endforelse
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-
-                {{-- SEÇÃO PARA PROFESSOR / COORDENADOR / ADMIN --}}
-            @else
+            @if($user && in_array($user->role, ['admin', 'coordenador', 'professor']))
                 <div class="flex flex-col sm:flex-row justify-between items-center mb-8">
                     <h1 class="text-3xl font-bold text-headline mb-4 sm:mb-0">
                         Formulários Cadastrados
                     </h1>
-                    <a href="{{ route('forms.create') }}"
-                       class="inline-flex items-center px-6 py-3 bg-primary border border-transparent rounded-lg font-semibold text-sm text-button-text uppercase tracking-widest hover:bg-opacity-90 active:bg-primary focus:outline-none focus:border-primary-dark focus:ring ring-primary-light disabled:opacity-25 transition ease-in-out duration-150 shadow-md hover:shadow-lg">
-                        <svg class="w-4 h-4 mr-2 -ml-1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                            <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" />
-                        </svg>
-                        Novo Formulário
-                    </a>
+                    @if(Auth::user()->role !== 'coordenador')
+                        <a href="{{ route('forms.create') }}"
+                           class="inline-flex items-center px-6 py-3 bg-primary border border-transparent rounded-lg font-semibold text-sm text-button-text uppercase tracking-widest hover:bg-opacity-90 active:bg-primary focus:outline-none focus:border-primary-dark focus:ring ring-primary-light disabled:opacity-25 transition ease-in-out duration-150 shadow-md hover:shadow-lg">
+                            <svg class="w-4 h-4 mr-2 -ml-1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" />
+                            </svg>
+                            Novo Formulário
+                        </a>
+                    @endif
                 </div>
 
                 @if (session('success'))
@@ -84,74 +31,101 @@
                     </div>
                 @endif
 
-                <div class="bg-background shadow-xl sm:rounded-lg overflow-x-auto">
-                    <table class="min-w-full">
-                        {{-- CABEÇALHO DA TABELA - CORRIGIDO --}}
-                        <thead class="bg-background border-b-2 border-gray-200">
+                {{-- ESTRUTURA FINAL DA TABELA, COM TODAS AS MELHORIAS --}}
+                <div class="bg-background shadow-xl sm:rounded-lg overflow-x-auto border border-gray-200">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
                         <tr>
-                            <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                                Título
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Formulário
                             </th>
-                            <th scope="col" class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                                Descrição
+                            <th scope="col" class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Status
                             </th>
-                            <th scope="col" class="px-6 py-3 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                                Validação
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Turma
                             </th>
-                            <th scope="col" class="px-6 py-3 text-right text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Ano Letivo
+                            </th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Criado por
+                            </th>
+                            <th scope="col" class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Perguntas
+                            </th>
+                            <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 Ações
                             </th>
                         </tr>
                         </thead>
-                        <tbody class="divide-y divide-gray-200">
+                        <tbody class="bg-white divide-y divide-gray-200">
                         @forelse ($forms as $form)
                             <tr class="hover:bg-gray-50 transition-colors duration-150">
                                 <td class="px-6 py-4 whitespace-nowrap">
-                                    <div class="text-sm font-medium text-headline">{{ $form->title }}</div>
-                                    <div class="text-xs text-gray-500">ID: {{ $form->id }}</div>
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-paragraph">
-                                    {{ Str::limit($form->description, 60) ?: '-' }}
+                                    <div class="text-sm font-medium text-primary hover:underline">
+                                        <a href="{{ route('forms.edit', $form) }}">
+                                            {{ $form->title }}
+                                        </a>
+                                    </div>
+                                    @if($form->description)
+                                        <div class="text-xs text-gray-500 mt-1 max-w-xs truncate" title="{{ $form->description }}">{{ $form->description }}</div>
+                                    @endif
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-center">
-                                    @if ($form->is_validated)
-                                        <span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
-                                        Validado
-                                    </span>
+                                    @if ($form->status === 'aprovado')
+                                        <span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">Aprovado</span>
+                                    @elseif ($form->status === 'reprovado')
+                                        <span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-danger">Reprovado</span>
                                     @else
-                                        <span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">
-                                        Pendente
-                                    </span>
+                                        <span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">Pendente</span>
                                     @endif
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-3">
-                                    @if (!$form->is_validated && (Auth::user()->role === 'coordenador' || Auth::user()->role === 'admin'))
-                                        <form action="{{ route('forms.validate', $form) }}" method="POST" class="inline-block">
-                                            @csrf
-                                            <button type="submit"
-                                                    class="text-green-600 hover:text-green-700 font-semibold hover:underline focus:outline-none" title="Validar Formulário">
-                                                Validar
-                                            </button>
-                                        </form>
-                                    @endif
-                                    <a href="{{ route('forms.edit', $form) }}"
-                                       class="text-primary hover:text-indigo-900 font-semibold hover:underline" title="Editar Formulário">Editar</a>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
+                                    {{ $form->turma ?: 'N/A' }}
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
+                                    {{ $form->ano_letivo ?: 'N/A' }}
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
+                                    {{ $form->creator->name ?? 'N/A' }}
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-center text-sm font-medium text-headline">
+                                    {{ $form->questions_count }}
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                    <div class="flex items-center justify-end space-x-2">
+                                        @if ($form->status === 'pendente' && (Auth::user()->role === 'coordenador' || Auth::user()->role === 'admin'))
+                                            <form action="{{ route('forms.approve', $form) }}" method="POST" class="contents">
+                                                @csrf
+                                                <button type="submit" class="inline-flex items-center justify-center px-4 py-2 bg-green-500 text-white text-xs font-semibold rounded-lg hover:bg-green-600 transition-colors duration-150 shadow-sm" title="Aprovar Formulário">
+                                                    Aprovar
+                                                </button>
+                                            </form>
+                                        @endif
 
-                                    <form id="deleteForm-{{ $form->id }}" action="{{ route('forms.destroy', $form) }}" method="POST" class="hidden">
-                                        @csrf
-                                        @method('DELETE')
-                                    </form>
-                                    <button type="button"
-                                            @click.prevent="formIdToDelete = 'deleteForm-{{ $form->id }}'; $dispatch('open-modal', 'confirm-form-deletion')"
-                                            class="text-danger hover:text-red-700 font-semibold hover:underline focus:outline-none" title="Excluir Formulário">
-                                        Excluir
-                                    </button>
+                                        <a href="{{ route('forms.edit', $form) }}" class="inline-flex items-center justify-center px-4 py-2 bg-secondary text-primary text-xs font-semibold rounded-lg hover:bg-opacity-80 transition-colors duration-150 shadow-sm" title="Editar Formulário">
+                                            Editar
+                                        </a>
+
+                                        <form id="deleteForm-{{ $form->id }}" action="{{ route('forms.destroy', $form) }}" method="POST" class="hidden">
+                                            @csrf
+                                            @method('DELETE')
+                                        </form>
+                                        <button type="button" @click.prevent="formIdToDelete = 'deleteForm-{{ $form->id }}'; $dispatch('open-modal', 'confirm-form-deletion')" class="inline-flex items-center justify-center px-4 py-2 bg-danger/90 text-button-text text-xs font-semibold rounded-lg hover:bg-danger transition-colors duration-150 shadow-sm" title="Excluir Formulário">
+                                            Excluir
+                                        </button>
+                                    </div>
                                 </td>
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="4" class="px-6 py-4 whitespace-nowrap text-sm text-paragraph text-center italic">
-                                    Nenhum formulário cadastrado ainda.
+                                <td colspan="7" class="px-6 py-16 text-center text-gray-500">
+                                    <div class="flex flex-col items-center">
+                                        <svg class="w-12 h-12 text-gray-400 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 13h6m-3-3v6m-9 1V7a2 2 0 012-2h14a2 2 0 012 2v10a2 2 0 01-2 2H4a2 2 0 01-2-2z"></path></svg>
+                                        <p class="font-semibold">Nenhum formulário encontrado.</p>
+                                        <p class="text-sm">Crie um novo formulário para começar.</p>
+                                    </div>
                                 </td>
                             </tr>
                         @endforelse
@@ -164,23 +138,18 @@
         {{-- Modal de Confirmação de Exclusão --}}
         <x-modal name="confirm-form-deletion" focusable>
             <div class="p-6">
-                <div class="text-center">
-                    <svg class="mx-auto h-12 w-12 text-danger" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
-                    </svg>
-                    <h3 class="mt-2 text-lg font-medium text-headline">
-                        Confirmar Exclusão
-                    </h3>
-                    <p class="mt-2 text-sm text-paragraph">
-                        Tem certeza de que deseja excluir este formulário? Esta ação não pode ser desfeita e removerá também todas as perguntas e respostas associadas.
-                    </p>
-                </div>
-                <div class="mt-6 flex justify-center space-x-3">
-                    <x-secondary-button @click="$dispatch('close')">
+                <h2 class="text-lg font-medium text-headline">
+                    Tem certeza que deseja excluir este formulário?
+                </h2>
+                <p class="mt-1 text-sm text-paragraph">
+                    Uma vez que o formulário for excluído, todos os seus dados e perguntas relacionadas serão permanentemente removidos. Esta ação não pode ser desfeita.
+                </p>
+                <div class="mt-6 flex justify-end space-x-3">
+                    <x-secondary-button @click.prevent="$dispatch('close')">
                         Cancelar
                     </x-secondary-button>
-                    <x-danger-button @click="if (formIdToDelete) { document.getElementById(formIdToDelete).submit(); } $dispatch('close')">
-                        Sim, Excluir
+                    <x-danger-button @click.prevent="document.getElementById(formIdToDelete).submit(); $dispatch('close');">
+                        Excluir Formulário
                     </x-danger-button>
                 </div>
             </div>

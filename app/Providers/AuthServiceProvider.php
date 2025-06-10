@@ -40,7 +40,7 @@ class AuthServiceProvider extends ServiceProvider
         });
 
         Gate::define('validate-form', function (User $user, Form $form) {
-            return $user->role === 'admin' || $user->role === 'coordenador';
+            return in_array($user->role, ['admin', 'coordenador']);
         });
 
         Gate::define('manage-students', function (User $user, ?User $targetUser = null) {
@@ -51,6 +51,19 @@ class AuthServiceProvider extends ServiceProvider
             if ($user->role === 'aluno' && $targetUser && $user->id === $targetUser->id) {
                 return true;
             }
+
+            Gate::define('create-form', function(User $user) {
+                return $user->role === 'professor';
+            });
+
+            Gate::define('update-form', function(User $user, Form $form) {
+                return $user->id === $form->creator_user_id;
+            });
+
+            Gate::define('delete-form', function(User $user, Form $form) {
+                return $user->id === $form->creator_user_id;
+            });
+
             return false;
         });
     }

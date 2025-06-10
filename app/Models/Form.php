@@ -11,29 +11,30 @@ class Form extends Model
     protected $table = 'forms';
 
     protected $casts = [
-        'is_validated' => 'bool',
         'validated_by' => 'int',
-        'creator_user_id' => 'int', // Adicionar cast
+        'creator_user_id' => 'int',
     ];
 
     protected $fillable = [
         'title',
         'description',
-        'is_validated',
+        'turma',
+        'ano_letivo',
+        'status', // Adicionado
+        'rejection_reason', // Adicionado
         'validated_by',
-        'creator_user_id', // Adicionar aos fillable
+        'creator_user_id',
     ];
 
-    // Relação com o usuário que validou (já existente)
-    public function validator() // Renomear de user para validator para clareza
-    {
-        return $this->belongsTo(User::class, 'validated_by');
-    }
-
-    // NOVA RELAÇÃO: Usuário que criou o formulário
+    // Relações...
     public function creator()
     {
         return $this->belongsTo(User::class, 'creator_user_id');
+    }
+
+    public function validator() // Mantendo o nome 'validator' para quem validou/aprovou
+    {
+        return $this->belongsTo(User::class, 'validated_by');
     }
 
     public function questions()
