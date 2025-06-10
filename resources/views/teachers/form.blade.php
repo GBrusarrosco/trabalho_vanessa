@@ -15,8 +15,32 @@
 
     {{-- Campo Documento --}}
     <div>
-        <x-input-label for="document" value="Documento" />
-        <x-text-input id="document" name="document" type="text" class="mt-1 block w-full" :value="old('document', $teacher->user->document ?? '')" required placeholder="CPF ou documento institucional" />
+        <x-input-label for="document" value="Documento (CPF)" />
+        <x-text-input
+            id="document"
+            name="document"
+            type="text"
+            class="mt-1 block w-full"
+            :value="old('document', $teacher->user->document ?? '')"
+            required
+            placeholder="___.___.___-__"
+            x-data="{
+            formatCpf(value) {
+                // Remove tudo que não for dígito
+                let onlyNumbers = value.replace(/\D/g, '');
+
+                // Limita a 11 dígitos
+                onlyNumbers = onlyNumbers.substring(0, 11);
+
+                // Aplica a formatação do CPF
+                return onlyNumbers
+                    .replace(/(\d{3})(\d)/, '$1.$2')
+                    .replace(/(\d{3})(\d)/, '$1.$2')
+                    .replace(/(\d{3})(\d{1,2})$/, '$1-$2');
+            }
+        }"
+            @input="$event.target.value = formatCpf($event.target.value)"
+        />
         <x-input-error :messages="$errors->get('document')" class="mt-2" />
     </div>
 

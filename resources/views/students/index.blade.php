@@ -3,99 +3,72 @@
         <h2 class="font-semibold text-2xl text-headline leading-tight">
             @php $user = Auth::user(); @endphp
             @if($user && $user->role === 'aluno')
-            Seus Dados Cadastrais
+                Seus Dados Cadastrais
             @else
-            Alunos
+                Gerenciamento de Alunos por Turma
             @endif
         </h2>
     </x-slot>
-    <div class="max-w-6xl mx-auto py-8 px-4">
-        @php $user = Auth::user(); @endphp
-        @if($user && $user->role === 'aluno')
-            @if(session('success'))
-                <div class="mb-4 p-4 rounded-lg bg-green-100 text-green-800 text-center animate-fade-in">
-                    {{ session('success') }}
-                </div>
-            @endif
-            @if(session('error'))
-                <div class="mb-4 p-4 rounded-lg bg-red-100 text-red-800 text-center animate-fade-in">
-                    {{ session('error') }}
-                </div>
-            @endif
-            <x-student-card :student="$user->student" :show-actions="true" />
-            <div class="mt-8 flex gap-4">
-                <a href="{{ route('dashboard') }}" class="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700 transition">Ver Avaliações</a>
-                <a href="{{ route('students.mini-report', $user->student) }}" class="px-4 py-2 bg-secondary text-paragraph rounded hover:bg-secondary/80 transition">Ver Mini-Relatório</a>
-            </div>
-        @else
-        <a href="{{ route('students.create') }}" class="inline-block mb-4 px-6 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-lg shadow transition">Novo Aluno</a>
-        @if (session('success'))
-        <div class="mb-4 p-4 rounded-lg bg-green-100 text-green-800 text-center animate-fade-in">
-            {{ session('success') }}
-        </div>
-        @endif
-        <div class="flex flex-col md:flex-row gap-4 mb-6">
-            <form method="GET" class="flex gap-2 items-end">
-                <div>
-                    <label for="filtro_nome" class="block text-xs font-semibold text-gray-500">Nome</label>
-                    <input type="text" name="filtro_nome" id="filtro_nome" value="{{ request('filtro_nome') }}" class="rounded border-gray-300 px-2 py-1 text-sm">
-                </div>
-                <div>
-                    <label for="filtro_turma" class="block text-xs font-semibold text-gray-500">Turma</label>
-                    <input type="text" name="filtro_turma" id="filtro_turma" value="{{ request('filtro_turma') }}" class="rounded border-gray-300 px-2 py-1 text-sm">
-                </div>
-                <div>
-                    <label for="filtro_ano" class="block text-xs font-semibold text-gray-500">Ano Letivo</label>
-                    <input type="text" name="filtro_ano" id="filtro_ano" value="{{ request('filtro_ano') }}" class="rounded border-gray-300 px-2 py-1 text-sm">
-                </div>
-                <button type="submit" class="px-3 py-2 bg-primary text-white rounded text-xs font-semibold">Filtrar</button>
-                <a href="{{ route('students.index') }}" class="px-3 py-2 bg-secondary text-paragraph rounded text-xs font-semibold">Limpar</a>
-            </form>
-        </div>
-        <div class="overflow-x-auto rounded-lg shadow">
-            <table class="min-w-full bg-white divide-y divide-gray-200">
-                <thead class="bg-indigo-100">
-                    <tr>
-                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-700 uppercase">Nome</th>
-                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-700 uppercase">Email</th>
-                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-700 uppercase">Documento</th>
-                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-700 uppercase">Turma</th>
-                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-700 uppercase">Ano Letivo</th>
-                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-700 uppercase">Ações</th>
-                    </tr>
-                </thead>
-                <tbody class="divide-y divide-gray-100">
-                    @foreach ($students as $student)
-                    <tr>
-                        <td class="px-4 py-2">{{ $student->user->name }}</td>
-                        <td class="px-4 py-2">{{ $student->user->email }}</td>
-                        <td class="px-4 py-2">{{ $student->user->document }}</td>
-                        <td class="px-4 py-2">{{ $student->turma }}</td>
-                        <td class="px-4 py-2">{{ $student->ano_letivo }}</td>
-                        <td class="px-4 py-2 flex gap-2">
-                            <a href="{{ route('students.edit', $student) }}" class="px-3 py-1 bg-indigo-600 hover:bg-indigo-700 text-white rounded shadow text-xs font-semibold transition">Editar</a>
-                            <button @click="openModal = true; selectedId = {{ $student->id }}" type="button" class="px-3 py-1 btn-danger text-xs">Excluir</button>
-                        </td>
-                    </tr>
-                    @endforeach
-                </tbody>
-            </table>
-        </div>
-        <!-- Modal de confirmação de exclusão (apenas visual, não exclui de fato) -->
-        <div x-data="{ openModal: false, selectedId: null }">
-            <template x-if="openModal">
-                <div class="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-40">
-                    <div class="bg-white rounded-lg shadow-lg p-8 max-w-sm w-full text-center">
-                        <h2 class="text-xl font-bold mb-4 text-red-600">Confirmar Exclusão</h2>
-                        <p class="mb-6 text-gray-700">Deseja realmente excluir este aluno? (Ação apenas visual)</p>
-                        <div class="flex justify-center gap-4">
-                            <button @click="openModal = false" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded font-semibold">Cancelar</button>
-                            <button @click="openModal = false" class="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded font-semibold">Sim, apenas fechar</button>
-                        </div>
+
+    <div class="py-12">
+        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+
+            {{-- LÓGICA EXISTENTE PARA O ALUNO VER SEU PRÓPRIO PERFIL --}}
+            @if($user && $user->role === 'aluno' && isset($students))
+                @if(session('success'))
+                    <div class="mb-4 p-4 rounded-lg bg-green-100 text-green-800 text-center">
+                        {{ session('success') }}
                     </div>
+                @endif
+                {{-- Supondo que a coleção tenha apenas um aluno, o próprio usuário --}}
+                @if($students->first())
+                    <x-student-card :student="$students->first()" :show-actions="true" />
+                @else
+                    <p class="text-center text-paragraph">Seus dados de aluno não foram encontrados.</p>
+                @endif
+
+                {{-- NOVA LÓGICA PARA ADMIN, COORDENADOR E PROFESSOR --}}
+            @else
+                <div class="flex flex-col sm:flex-row justify-between items-center mb-8">
+                    <h1 class="text-3xl font-bold text-headline mb-4 sm:mb-0">
+                        Turmas Cadastradas
+                    </h1>
+                    @can('manage-students')
+                        <a href="{{ route('students.create') }}"
+                           class="inline-flex items-center px-6 py-3 bg-primary border border-transparent rounded-lg font-semibold text-sm text-button-text uppercase tracking-widest hover:bg-opacity-90 active:bg-primary focus:outline-none focus:border-primary-dark focus:ring ring-primary-light disabled:opacity-25 transition ease-in-out duration-150 shadow-md hover:shadow-lg">
+                            <svg class="w-4 h-4 mr-2 -ml-1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z"/></svg>
+                            Novo Aluno
+                        </a>
+                    @endcan
                 </div>
-            </template>
+
+                @if (session('success'))
+                    <div class="mb-6 p-4 rounded-md bg-green-100 border border-green-200 text-sm text-green-800 shadow-sm">
+                        {{ session('success') }}
+                    </div>
+                @endif
+
+                @if($turmas->isEmpty())
+                    <div class="text-center py-16 bg-background rounded-lg shadow-md">
+                        <p class="font-semibold text-paragraph">Nenhuma turma com alunos encontrada.</p>
+                        <p class="text-sm text-gray-500">Cadastre um novo aluno para começar.</p>
+                    </div>
+                @else
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        @foreach ($turmas as $turma)
+                            <a href="{{ route('students.by_class', ['turma' => $turma->turma, 'ano_letivo' => $turma->ano_letivo]) }}"
+                               class="block bg-background p-6 rounded-xl shadow-lg border border-secondary hover:shadow-2xl hover:border-primary transition-all duration-300 transform hover:-translate-y-1">
+                                <h3 class="text-xl font-bold text-primary truncate">{{ $turma->turma }}</h3>
+                                <p class="text-sm text-paragraph mt-1">Ano Letivo: {{ $turma->ano_letivo }}</p>
+                                <div class="mt-4 pt-4 border-t border-secondary flex justify-between items-center">
+                                    <span class="text-sm font-medium text-headline">Total de Alunos</span>
+                                    <span class="px-3 py-1 text-sm font-bold text-button-text bg-primary rounded-full">{{ $turma->student_count }}</span>
+                                </div>
+                            </a>
+                        @endforeach
+                    </div>
+                @endif
+            @endif
         </div>
-        @endif
     </div>
 </x-app-layout>

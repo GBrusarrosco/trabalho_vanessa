@@ -41,8 +41,8 @@ Route::post('/register', [AuthController::class, 'register'])->name('register.pe
 */
 Route::middleware(['auth'])->group(function () {
 
-    // Rota de Logout
-//    Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+    // Rota de Logout (Se decidir usar o AuthController customizado para logout)
+     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
     /*
     | Rotas que também exigem que o e-mail seja verificado
@@ -69,6 +69,14 @@ Route::middleware(['auth'])->group(function () {
     // CRUDs com permissões específicas
     Route::resource('teachers', TeacherController::class)->middleware('can:manage-teachers');
     Route::resource('coordinators', CoordinatorController::class)->middleware('can:manage-coordinators');
+
+    // ---> INÍCIO DA ALTERAÇÃO <---
+    // Nova rota para listar alunos por turma, antes do Route::resource
+    Route::get('/students/class/{turma}/{ano_letivo}', [StudentController::class, 'showByClass'])
+        ->name('students.by_class')
+        ->middleware('can:manage-students');
+    // ---> FIM DA ALTERAÇÃO <---
+
     Route::resource('students', StudentController::class)->middleware('can:manage-students');
 
     // CRUDs de Formulários e Perguntas
@@ -82,12 +90,13 @@ Route::middleware(['auth'])->group(function () {
     // Ações do Aluno para Responder Formulários
     Route::get('forms/{form}/responder', [AnswerController::class, 'showForm'])->name('forms.responder');
     Route::post('forms/{form}/responder', [AnswerController::class, 'store'])->name('forms.enviar');
+
+    Route::post('forms/{form}/approve', [FormController::class, 'approve'])->name('forms.approve');
+    Route::post('forms/{form}/reject', [FormController::class, 'reject'])->name('forms.reject');
+
+    // NOVA ROTA para reenviar o formulário
+    Route::post('forms/{form}/resubmit', [FormController::class, 'resubmit'])->name('forms.resubmit');
 });
 
-/*
-|--------------------------------------------------------------------------
-| Rotas de Autenticação Auxiliares (Breeze)
-|--------------------------------------------------------------------------
-| Carrega rotas como 'esqueci minha senha', verificação de email, etc.
-*/
-//require __DIR__.'/auth.php';
+
+// require __DIR__.'/auth.php';

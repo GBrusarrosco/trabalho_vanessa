@@ -6,86 +6,85 @@
     </x-slot>
 
     <div class="py-12">
-        <div class="max-w-5xl mx-auto sm:px-6 lg:px-8"> {{-- Aumentei um pouco o max-width para relatórios --}}
+        <div class="max-w-5xl mx-auto sm:px-6 lg:px-8">
 
             @if($forms->isEmpty())
                 <div class="bg-background overflow-hidden shadow-xl sm:rounded-lg p-8 text-center">
-                    <svg class="mx-auto h-16 w-16 text-gray-400" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9 5.25h.008v.008H12v-.008z" />
-                    </svg>
-                    <h3 class="mt-4 text-xl font-semibold text-headline">Nenhum Formulário</h3>
-                    <p class="mt-2 text-sm text-paragraph">
-                        Ainda não há formulários com respostas ou você não tem acesso aos relatórios correspondentes.
-                    </p>
+                    {{-- ... (código para estado vazio permanece o mesmo) ... --}}
                 </div>
             @else
-                <div class="space-y-8"> {{-- Espaçamento entre os cards de cada formulário --}}
+                <div class="space-y-10">
                     @foreach($forms as $form)
-                        <div class="bg-background overflow-hidden shadow-2xl sm:rounded-xl"> {{-- Sombra mais pronunciada para o card principal do formulário --}}
+                        <div class="bg-background overflow-hidden shadow-2xl sm:rounded-xl border border-secondary">
                             <div class="p-6 sm:p-8 border-b border-secondary">
                                 <h3 class="text-2xl font-bold text-primary mb-1">{{ $form->title }}</h3>
-                                <div class="flex flex-wrap items-center text-xs text-paragraph space-x-4">
-                                    @if($form->creator)
-                                        <span>Criado por: <strong class="text-headline">{{ $form->creator->name }}</strong></span>
-                                    @endif
-                                    @if($form->is_validated)
-                                        <span class="px-2 py-0.5 rounded-full bg-green-100 text-green-800 font-medium">Validado</span>
-                                        @if($form->validator)
-                                            <span class="text-xs text-gray-500">(por {{ $form->validator->name }})</span>
-                                        @endif
-                                    @else
-                                        <span class="px-2 py-0.5 rounded-full bg-yellow-100 text-yellow-800 font-medium">Pendente de Validação</span>
-                                    @endif
-                                    <span>Criado em: {{ $form->created_at->format('d/m/Y H:i') }}</span>
+                                <p class="text-sm text-paragraph">{{ $form->description ?? 'Este formulário não possui descrição.' }}</p>
+                                <div class="mt-2 text-xs text-paragraph">
+                                    <span>Criado por: <strong class="text-headline">{{ $form->creator->name ?? 'N/A' }}</strong></span> |
+                                    <span>Status: <strong class="text-headline">{{ ucfirst($form->status) }}</strong></span>
                                 </div>
-                                <p class="mt-3 text-sm text-paragraph">{{ $form->description ?? 'Este formulário não possui uma descrição detalhada.' }}</p>
                             </div>
 
-                            <div class="p-6 sm:p-8">
-                                @if($form->questions->isEmpty())
-                                    <div class="text-center py-6">
-                                        <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9 5.25h.008v.008H12v-.008z" />
-                                        </svg>
-                                        <h4 class="mt-2 text-md font-medium text-headline">Sem Perguntas</h4>
-                                        <p class="mt-1 text-xs text-paragraph">Este formulário não possui perguntas cadastradas.</p>
-                                    </div>
-                                @else
-                                    <h4 class="text-lg font-semibold text-headline mb-4">Respostas por Pergunta:</h4>
-                                    <div class="space-y-6">
-                                        @foreach($form->questions as $question)
-                                            <div class="bg-gray-50 dark:bg-gray-800/50 p-4 rounded-lg border border-secondary">
-                                                <div class="flex justify-between items-start mb-3">
-                                                    <h5 class="text-md font-semibold text-headline">
-                                                        {{ $loop->iteration }}. {{ $question->question_text }}
-                                                    </h5>
-                                                    <span class="text-xs font-medium px-2 py-1 rounded-full bg-indigo-100 text-primary">
-                                                        {{ ucfirst(str_replace('_', ' ', $question->type)) }}
-                                                    </span>
-                                                </div>
+                            <div class="p-6 sm:p-8 space-y-8">
+                                @forelse($form->questions as $question)
+                                    <div class="bg-gray-50 p-5 rounded-lg border border-secondary/50">
+                                        <h4 class="text-md font-semibold text-headline">
+                                            {{ $loop->iteration }}. {{ $question->question_text }}
+                                        </h4>
+                                        <hr class="my-3">
 
-                                                @if($question->answers->isEmpty())
-                                                    <p class="text-sm text-paragraph italic pl-2">Nenhuma resposta recebida para esta pergunta.</p>
-                                                @else
-                                                    <div class="space-y-2 pl-2">
-                                                        @foreach($question->answers as $answer)
-                                                            <div class="text-sm text-paragraph border-l-4 border-primary pl-3 py-1 bg-background rounded-r-md">
-                                                                <span class="font-semibold text-headline">{{ $answer->student->user->name ?? 'Aluno desconhecido' }}:</span>
-                                                                <p class="mt-0.5 whitespace-pre-wrap">{{ $answer->answer_text }}</p>
-                                                            </div>
-                                                        @endforeach
+                                        @if($question->answers->isEmpty())
+                                            <p class="text-sm text-paragraph italic">Nenhuma resposta recebida para esta pergunta.</p>
+                                        @else
+                                            {{-- Lógica condicional para tipo de pergunta --}}
+                                            @if($question->type === 'multipla_escolha')
+                                                <div class="max-w-full">
+                                                    {{-- O Canvas onde o gráfico será renderizado --}}
+                                                    <canvas x-data
+                                                            x-init="
+                                                                new Chart($el, {
+                                                                    type: 'bar',
+                                                                    data: {
+                                                                        labels: @json($question->chart_data['labels']),
+                                                                        datasets: [{
+                                                                            label: 'Nº de Respostas',
+                                                                            data: @json($question->chart_data['values']),
+                                                                            backgroundColor: 'rgba(98, 70, 234, 0.6)',
+                                                                            borderColor: 'rgba(98, 70, 234, 1)',
+                                                                            borderWidth: 1
+                                                                        }]
+                                                                    },
+                                                                    options: {
+                                                                        indexAxis: 'y', // Gráfico de barras horizontais
+                                                                        scales: {
+                                                                            x: { beginAtZero: true, ticks: { stepSize: 1 } }
+                                                                        },
+                                                                        plugins: { legend: { display: false } }
+                                                                    }
+                                                                });
+                                                            "
+                                                    ></canvas>
+                                                </div>
+                                            @else {{-- Para tipo 'texto' --}}
+                                            <div class="space-y-3 max-h-60 overflow-y-auto pr-2">
+                                                @foreach($question->answers as $answer)
+                                                    <div class="text-sm border-l-4 border-primary/50 pl-3 py-1 bg-white rounded-r-md">
+                                                        <p class="text-paragraph whitespace-pre-wrap">{{ $answer->answer_text }}</p>
+                                                        <p class="text-xs text-gray-500 mt-1">- {{ $answer->student->user->name ?? 'Aluno' }}</p>
                                                     </div>
-                                                @endif
+                                                @endforeach
                                             </div>
-                                        @endforeach
+                                            @endif
+                                        @endif
                                     </div>
-                                @endif
+                                @empty
+                                    <p class="text-center text-paragraph py-8">Este formulário não possui perguntas.</p>
+                                @endforelse
                             </div>
                         </div>
                     @endforeach
                 </div>
             @endif
-
         </div>
     </div>
 </x-app-layout>

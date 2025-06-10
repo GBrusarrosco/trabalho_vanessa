@@ -31,32 +31,17 @@
                     </div>
                 @endif
 
-                {{-- ESTRUTURA FINAL DA TABELA, COM TODAS AS MELHORIAS --}}
                 <div class="bg-background shadow-xl sm:rounded-lg overflow-x-auto border border-gray-200">
                     <table class="min-w-full divide-y divide-gray-200">
                         <thead class="bg-gray-50">
                         <tr>
-                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Formulário
-                            </th>
-                            <th scope="col" class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Status
-                            </th>
-                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Turma
-                            </th>
-                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Ano Letivo
-                            </th>
-                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Criado por
-                            </th>
-                            <th scope="col" class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Perguntas
-                            </th>
-                            <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Ações
-                            </th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Formulário</th>
+                            <th scope="col" class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Turma</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ano Letivo</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Criado por</th>
+                            <th scope="col" class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Perguntas</th>
+                            <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Ações</th>
                         </tr>
                         </thead>
                         <tbody class="bg-white divide-y divide-gray-200">
@@ -64,9 +49,7 @@
                             <tr class="hover:bg-gray-50 transition-colors duration-150">
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     <div class="text-sm font-medium text-primary hover:underline">
-                                        <a href="{{ route('forms.edit', $form) }}">
-                                            {{ $form->title }}
-                                        </a>
+                                        <a href="{{ route('forms.edit', $form) }}">{{ $form->title }}</a>
                                     </div>
                                     @if($form->description)
                                         <div class="text-xs text-gray-500 mt-1 max-w-xs truncate" title="{{ $form->description }}">{{ $form->description }}</div>
@@ -81,43 +64,51 @@
                                         <span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">Pendente</span>
                                     @endif
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
-                                    {{ $form->turma ?: 'N/A' }}
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
-                                    {{ $form->ano_letivo ?: 'N/A' }}
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
-                                    {{ $form->creator->name ?? 'N/A' }}
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-center text-sm font-medium text-headline">
-                                    {{ $form->questions_count }}
-                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{{ $form->turma ?: 'N/A' }}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{{ $form->ano_letivo ?: 'N/A' }}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{{ $form->creator->name ?? 'N/A' }}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-center text-sm font-medium text-headline">{{ $form->questions_count }}</td>
                                 <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                     <div class="flex items-center justify-end space-x-2">
+                                        {{-- COORDENADOR: Botão de aprovar formulário pendente --}}
                                         @if ($form->status === 'pendente' && (Auth::user()->role === 'coordenador' || Auth::user()->role === 'admin'))
                                             <form action="{{ route('forms.approve', $form) }}" method="POST" class="contents">
                                                 @csrf
-                                                <button type="submit" class="inline-flex items-center justify-center px-4 py-2 bg-green-500 text-white text-xs font-semibold rounded-lg hover:bg-green-600 transition-colors duration-150 shadow-sm" title="Aprovar Formulário">
-                                                    Aprovar
-                                                </button>
+                                                <button type="submit" class="inline-flex items-center justify-center px-4 py-2 bg-green-500 text-white text-xs font-semibold rounded-lg hover:bg-green-600" title="Aprovar Formulário">Aprovar</button>
                                             </form>
                                         @endif
 
-                                        <a href="{{ route('forms.edit', $form) }}" class="inline-flex items-center justify-center px-4 py-2 bg-secondary text-primary text-xs font-semibold rounded-lg hover:bg-opacity-80 transition-colors duration-150 shadow-sm" title="Editar Formulário">
-                                            Editar
-                                        </a>
+                                        {{-- PROFESSOR: Botão de reenviar formulário reprovado --}}
+                                        @can('resubmit-form', $form)
+                                            <form action="{{ route('forms.resubmit', $form) }}" method="POST" class="contents">
+                                                @csrf
+                                                <button type="submit" class="inline-flex items-center justify-center px-4 py-2 bg-blue-500 text-white text-xs font-semibold rounded-lg hover:bg-blue-600" title="Reenviar para Análise">Reenviar</button>
+                                            </form>
+                                        @endcan
 
-                                        <form id="deleteForm-{{ $form->id }}" action="{{ route('forms.destroy', $form) }}" method="POST" class="hidden">
-                                            @csrf
-                                            @method('DELETE')
-                                        </form>
-                                        <button type="button" @click.prevent="formIdToDelete = 'deleteForm-{{ $form->id }}'; $dispatch('open-modal', 'confirm-form-deletion')" class="inline-flex items-center justify-center px-4 py-2 bg-danger/90 text-button-text text-xs font-semibold rounded-lg hover:bg-danger transition-colors duration-150 shadow-sm" title="Excluir Formulário">
-                                            Excluir
-                                        </button>
+                                        <a href="{{ route('forms.edit', $form) }}" class="inline-flex items-center justify-center px-4 py-2 bg-secondary text-primary text-xs font-semibold rounded-lg hover:bg-opacity-80" title="Editar Formulário">Editar</a>
+
+                                        <form id="deleteForm-{{ $form->id }}" action="{{ route('forms.destroy', $form) }}" method="POST" class="hidden">@csrf @method('DELETE')</form>
+                                        <button type="button" @click.prevent="formIdToDelete = 'deleteForm-{{ $form->id }}'; $dispatch('open-modal', 'confirm-form-deletion')" class="inline-flex items-center justify-center px-4 py-2 bg-danger/90 text-button-text text-xs font-semibold rounded-lg hover:bg-danger" title="Excluir Formulário">Excluir</button>
                                     </div>
                                 </td>
                             </tr>
+                            {{-- LINHA ADICIONAL PARA EXIBIR MOTIVO DA REPROVAÇÃO --}}
+                            @if ($form->status === 'reprovado' && $form->rejection_reason)
+                                <tr class="bg-red-50 border-l-4 border-red-300">
+                                    <td colspan="7" class="px-6 py-3 text-sm text-red-800">
+                                        <div class="flex items-center gap-x-3">
+                                            <svg class="w-5 h-5 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-8-5a.75.75 0 01.75.75v4.5a.75.75 0 01-1.5 0v-4.5A.75.75 0 0110 5zm0 10a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd" /></svg>
+                                            <div>
+                                                <strong class="font-semibold">Motivo da Reprovação:</strong> {{ $form->rejection_reason }}
+                                                @if($form->validator)
+                                                    <em class="text-xs text-red-600 block mt-1">- Reprovado por: {{ $form->validator->name }}</em>
+                                                @endif
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                            @endif
                         @empty
                             <tr>
                                 <td colspan="7" class="px-6 py-16 text-center text-gray-500">
@@ -135,22 +126,15 @@
             @endif
         </div>
 
-        {{-- Modal de Confirmação de Exclusão --}}
         <x-modal name="confirm-form-deletion" focusable>
             <div class="p-6">
-                <h2 class="text-lg font-medium text-headline">
-                    Tem certeza que deseja excluir este formulário?
-                </h2>
+                <h2 class="text-lg font-medium text-headline">Tem certeza que deseja excluir este formulário?</h2>
                 <p class="mt-1 text-sm text-paragraph">
                     Uma vez que o formulário for excluído, todos os seus dados e perguntas relacionadas serão permanentemente removidos. Esta ação não pode ser desfeita.
                 </p>
                 <div class="mt-6 flex justify-end space-x-3">
-                    <x-secondary-button @click.prevent="$dispatch('close')">
-                        Cancelar
-                    </x-secondary-button>
-                    <x-danger-button @click.prevent="document.getElementById(formIdToDelete).submit(); $dispatch('close');">
-                        Excluir Formulário
-                    </x-danger-button>
+                    <x-secondary-button @click.prevent="$dispatch('close')">Cancelar</x-secondary-button>
+                    <x-danger-button @click.prevent="document.getElementById(formIdToDelete).submit(); $dispatch('close');">Excluir Formulário</x-danger-button>
                 </div>
             </div>
         </x-modal>
