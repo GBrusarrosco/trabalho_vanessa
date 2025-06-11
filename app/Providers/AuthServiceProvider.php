@@ -9,18 +9,10 @@ use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvid
 
 class AuthServiceProvider extends ServiceProvider
 {
-    /**
-     * The policy mappings for the application.
-     *
-     * @var array<class-string, class-string>
-     */
     protected $policies = [
         //
     ];
 
-    /**
-     * Register any authentication / authorization services.
-     */
     public function boot(): void
     {
         $this->registerPolicies();
@@ -30,7 +22,8 @@ class AuthServiceProvider extends ServiceProvider
         });
 
         Gate::define('manage-coordinators', function (User $user) {
-            return $user->role === 'admin';
+            // Agora Admin E Coordenador podem gerenciar coordenadores
+            return in_array($user->role, ['admin', 'coordenador']);
         });
 
         Gate::define('view-reports', function (User $user) {
@@ -41,20 +34,15 @@ class AuthServiceProvider extends ServiceProvider
             return in_array($user->role, ['admin', 'coordenador']);
         });
 
-        // ===== INÍCIO DA ALTERAÇÃO =====
         Gate::define('manage-students', function (User $user, ?User $targetUser = null) {
-            // Admin, coordenador E PROFESSOR podem gerenciar alunos.
             if (in_array($user->role, ['admin', 'coordenador', 'professor'])) {
                 return true;
             }
-            // Aluno só pode ver/editar a si mesmo
             if ($user->role === 'aluno' && $targetUser && $user->id === $targetUser->id) {
                 return true;
             }
-
             return false;
         });
-        // ===== FIM DA ALTERAÇÃO =====
 
         Gate::define('create-form', function(User $user) {
             return $user->role === 'professor';
@@ -68,9 +56,7 @@ class AuthServiceProvider extends ServiceProvider
             return $user->id === $form->creator_user_id;
         });
 
-        // NOVO GATE para a ação de reenviar
         Gate::define('resubmit-form', function (User $user, Form $form) {
-            // Permite apenas se o usuário for o criador E o status for 'reprovado'
             return $user->id === $form->creator_user_id && $form->status === 'reprovado';
         });
     }

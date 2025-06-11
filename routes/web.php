@@ -96,6 +96,12 @@ Route::middleware(['auth'])->group(function () {
 
     // NOVA ROTA para reenviar o formulário
     Route::post('forms/{form}/resubmit', [FormController::class, 'resubmit'])->name('forms.resubmit');
+
+    Route::get('forms/{form}/responder', [AnswerController::class, 'showForm'])->name('forms.responder');
+    Route::post('forms/{form}/responder', [AnswerController::class, 'store'])->name('forms.enviar');
+
+    // NOVA ROTA PARA O HISTÓRICO DO ALUNO
+    Route::get('/meu-historico', [StudentController::class, 'showHistory'])->name('students.history');
 });
 
 

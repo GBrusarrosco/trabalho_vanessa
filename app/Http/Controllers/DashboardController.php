@@ -42,13 +42,27 @@ class DashboardController extends Controller
         // Estatísticas e Itens para Aluno
         if ($user->role === 'aluno' && $user->student) {
             $student = $user->student;
-            $answeredFormsIds = $student->answers()->join('questions', 'answers.question_id', '=', 'questions.id')->select('questions.form_id')->distinct()->pluck('form_id');
-            $assignedFormsQuery = Form::where('status', 'aprovado')->where('turma', $student->turma)->where('ano_letivo', $student->ano_letivo);
 
+            // Pega os IDs dos formulários que o aluno já respondeu
+            $answeredFormsIds = $student->answers()
+                ->join('questions', 'answers.question_id', '=', 'questions.id')
+                ->select('questions.form_id')
+                ->distinct()
+                ->pluck('form_id');
+
+            // Query para formulários atribuídos e aprovados
+            $assignedFormsQuery = Form::where('status', 'aprovado')
+                ->where('turma', $student->turma)
+                ->where('ano_letivo', $student->ano_letivo);
+
+            // Estatísticas
             $stats['total_assigned_forms'] = (clone $assignedFormsQuery)->count();
             $stats['pending_forms_to_answer'] = (clone $assignedFormsQuery)->whereNotIn('forms.id', $answeredFormsIds)->count();
 
-            $recentItems['forms_to_answer'] = (clone $assignedFormsQuery)->whereNotIn('forms.id', $answeredFormsIds)->latest()->take(3)->get();
+            // Itens de Ação
+            $recentItems['forms_to_answer'] = (clone $assignedFormsQuery)->whereNotIn('forms.id', $answeredFormsIds)->latest()->get();
+            // Busca também os formulários concluídos
+            $recentItems['completed_forms'] = Form::whereIn('id', $answeredFormsIds)->latest()->take(5)->get();
         }
 
         // Itens para Coordenador

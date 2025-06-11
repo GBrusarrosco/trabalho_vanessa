@@ -150,4 +150,21 @@ class StudentController extends Controller
         $answers = $student->answers()->with(['question.form.creator'])->latest()->get();
         return view('students.mini-report', compact('student', 'answers'));
     }
+
+    public function showHistory()
+    {
+        $student = Auth::user()->student;
+
+        if (!$student) {
+            abort(404, 'Perfil de aluno não encontrado.');
+        }
+
+        // Busca as respostas e agrupa pelo formulário
+        $answersByForm = $student->answers()
+            ->with(['question.form']) // Carrega as relações para evitar N+1 queries
+            ->get()
+            ->groupBy('question.form.title');
+
+        return view('students.history', compact('answersByForm'));
+    }
 }
